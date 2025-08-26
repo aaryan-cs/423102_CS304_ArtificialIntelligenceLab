@@ -1,33 +1,30 @@
-#Solve 8 puzzle using A* search and RBFS.
 import heapq
 import random
 import math
+
 def print_states(state):
     for i in range(0,9,3):
         print(state[i:i+3])
     print()
+
 def check_solvability(start):
     inv_count = 0
     for i in range(8):
         for j in range(i+1,9):
             if start[i] != 0 and start[j] != 0 and start[i] > start[j]:
                 inv_count += 1
-    return inv_count%2==0
+    return inv_count % 2 == 0
+
 def find_neighbours(state):
     neighbours = []
-    #blank tile
     index = state.index(0)
     moves = []
-    #can move up
     if index not in [0,1,2]:
         moves.append(index-3)
-    #can move down
     if index not in [6,7,8]:
         moves.append(index+3)
-    #can move left
     if index not in [0,3,6]:
         moves.append(index-1)
-    #can move right    
     if index not in [2,5,8]:
         moves.append(index+1)
     for move in moves:
@@ -39,55 +36,85 @@ def find_neighbours(state):
 def misplacedTilesHeuristic(state):
     numMisplaced = 0
     for i in range(len(state)):
-        if state[i] !=  i:
+        if state[i] != i and state[i] != 0:
             numMisplaced += 1
     return numMisplaced
 
-def AStar(start,target):
+# A* 
+def AStar(start, target):
     openlist = []
-    heapq.heappush(openlist, (0 + misplacedTilesHeuristic(start), 0, start, [start]))  
+    heapq.heappush(openlist, (manhattanHeuristic(start), 0, start, [start]))
     closedset = set()
     while openlist:
         f, g, state, path = heapq.heappop(openlist)
-        if tuple(state) in closedset:
+        state_tuple = tuple(state)
+        if state_tuple in closedset:
             continue
-        closedset.add(tuple(state))
+        closedset.add(state_tuple)
         if state == target:
-            return path  
+            return path
         for neighbour in find_neighbours(state):
-            if tuple(neighbour) not in closedset:
+            neighbour_tuple = tuple(neighbour)
+            if neighbour_tuple not in closedset:
                 new_g = g + 1
-                new_h = misplacedTilesHeuristic(neighbour)
+                new_h = manhattanHeuristic(neighbour)
                 new_f = new_g + new_h
                 heapq.heappush(openlist, (new_f, new_g, neighbour, path + [neighbour]))
-    return None    
+    return None
+
+
+def manhattanHeuristic(state):
+    dist = 0
+    for i in range(1,9):
+        idx = state.index(i)
+        correct_idx = i
+        x1, y1 = divmod(idx, 3)
+        x2, y2 = divmod(correct_idx, 3)
+        dist += abs(x1 - x2) + abs(y1 - y2)
+    return dist
+
+# RBFS
 
 def RBFS(start, target):
     def rbfs(node, f_limit):
         state, path, g = node
-        f = g + misplacedTilesHeuristic(state)
+        f = g + manhattanHeuristic(state)
+
         if state == target:
-            return path, True, 0
+            return path, True, f
+
         successors = []
         for neighbour in find_neighbours(state):
             if neighbour not in path:
                 new_g = g + 1
-                f_val = max(new_g + misplacedTilesHeuristic(neighbour), f)
+                f_val = max(new_g + manhattanHeuristic(neighbour), f)  
                 successors.append((neighbour, path + [neighbour], new_g, f_val))
+
         if not successors:
             return None, False, math.inf
+
         while True:
-            successors.sort(key=lambda x: x[3])  
+
+            successors.sort(key=lambda x: x[3])
             best = successors[0]
+
+            # If best exceeds f_limit, fail
             if best[3] > f_limit:
                 return None, False, best[3]
+
+            # Alternative f (2nd best)
             alternative = successors[1][3] if len(successors) > 1 else math.inf
+
+            # Recursive call on best
             result, found, new_f = rbfs((best[0], best[1], best[2]), min(f_limit, alternative))
-            best[3] = new_f
+
+            # Update f-value of best after recursion
+            successors[0] = (best[0], best[1], best[2], new_f)
+
             if found:
-                return result, True, 0
+                return result, True, new_f
 
-
+    # Start RBFS
     path, found, _ = rbfs((start, [start], 0), math.inf)
     return path if found else None
 
@@ -96,34 +123,34 @@ def init_random_initial_state():
     random.shuffle(state)
     return state
 
-# start_state = [7,2,4,5,0,6,8,3,1]
+# Use either a fixed start or a random one
 start_state = init_random_initial_state()
 target_state = [0,1,2,3,4,5,6,7,8]
 print("\nInitial State:")
 print_states(start_state)
-
 print("Target State:")
 print_states(target_state)
 
-# A* attempt
-print("A* Search:")
-a_star_result = AStar(start_state, target_state)
-if a_star_result:
-    for step in a_star_result:
-        print_states(step)
-    print(f"Solution found in {len(a_star_result)-1} moves:")
-else:
-    print("No solution found using A*.")
-# rbfs attempt
-print("RBFS Search:")
-rbfs_result = RBFS(start_state, target_state)
-if rbfs_result:
-    for step in rbfs_result:
-        print_states(step)
-    print(f"Solution found in {len(rbfs_result)-1} moves:")
-else:
-    print("No solution found using dfs.")
 if check_solvability(start_state):
+    # A* attempt
+    print("A* Search:")
+    a_star_result = AStar(start_state, target_state)
+    if a_star_result:
+        for step in a_star_result:
+            print_states(step)
+        print(f"Solution found in {len(a_star_result)-1} moves:")
+    else:
+        print("No solution found using A*.")
+
+    # RBFS attempt
+    print("RBFS Search:")
+    rbfs_result = RBFS(start_state, target_state)
+    if rbfs_result:
+        for step in rbfs_result:
+            print_states(step)
+        print(f"Solution found in {len(rbfs_result)-1} moves:")
+    else:
+        print("No solution found using RBFS.")
     print("It is solvable")
 else:
     print("It is not solvable")
