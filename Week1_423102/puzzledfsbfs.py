@@ -50,7 +50,7 @@ def bfs(start, target):
             bfsqueue.append(new_path)
     return None
 def dfs(start, target):
-    MAX_CAP = 1000
+    MAX_CAP = 100
     visited = set()
     stack = [[start]]
     while stack:
@@ -90,7 +90,7 @@ if bfs_result:
         print_states(step)
     print(f"Solution found in {len(bfs_result)-1} moves:")
 else:
-    print("No solution found using BFS.")
+    print("No solution found using bfs.")
 #dfs attempt
 print("DFS Search:")
 dfs_result = dfs(start_state, target_state)

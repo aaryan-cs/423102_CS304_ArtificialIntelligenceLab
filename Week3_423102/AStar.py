@@ -1,6 +1,11 @@
 import heapq
 import random
 import math
+<<<<<<< HEAD
+=======
+import time
+import tracemalloc
+>>>>>>> 52317de (Week 6,7,8 added.)
 
 def print_states(state):
     for i in range(0,9,3):
@@ -39,6 +44,19 @@ def misplacedTilesHeuristic(state):
         if state[i] != i and state[i] != 0:
             numMisplaced += 1
     return numMisplaced
+<<<<<<< HEAD
+=======
+def manhattanHeuristic(state):
+    dist = 0
+    for i in range(1,9):
+        idx = state.index(i)
+        correct_idx = i
+        x1, y1 = divmod(idx, 3)
+        x2, y2 = divmod(correct_idx, 3)
+        dist += abs(x1 - x2) + abs(y1 - y2)
+    return dist
+
+>>>>>>> 52317de (Week 6,7,8 added.)
 
 # A* 
 def AStar(start, target):
@@ -63,6 +81,7 @@ def AStar(start, target):
     return None
 
 
+<<<<<<< HEAD
 def manhattanHeuristic(state):
     dist = 0
     for i in range(1,9):
@@ -72,6 +91,8 @@ def manhattanHeuristic(state):
         x2, y2 = divmod(correct_idx, 3)
         dist += abs(x1 - x2) + abs(y1 - y2)
     return dist
+=======
+>>>>>>> 52317de (Week 6,7,8 added.)
 
 # RBFS
 
@@ -134,21 +155,42 @@ print_states(target_state)
 if check_solvability(start_state):
     # A* attempt
     print("A* Search:")
+<<<<<<< HEAD
     a_star_result = AStar(start_state, target_state)
+=======
+    a_start_time = time.time()
+    a_star_result = AStar(start_state, target_state)
+    astartime = time.time() - a_start_time
+>>>>>>> 52317de (Week 6,7,8 added.)
     if a_star_result:
         for step in a_star_result:
             print_states(step)
         print(f"Solution found in {len(a_star_result)-1} moves:")
+<<<<<<< HEAD
+=======
+        print(f"Time taken : {astartime:.8f} s.")
+>>>>>>> 52317de (Week 6,7,8 added.)
     else:
         print("No solution found using A*.")
 
     # RBFS attempt
     print("RBFS Search:")
+<<<<<<< HEAD
     rbfs_result = RBFS(start_state, target_state)
+=======
+    rbfs_start_time = time.time()
+    rbfs_result = RBFS(start_state, target_state)
+    rbfs_time = time.time() - rbfs_start_time
+>>>>>>> 52317de (Week 6,7,8 added.)
     if rbfs_result:
         for step in rbfs_result:
             print_states(step)
         print(f"Solution found in {len(rbfs_result)-1} moves:")
+<<<<<<< HEAD
+=======
+        print(f"Time taken : {rbfs_time:.8f} s.")
+
+>>>>>>> 52317de (Week 6,7,8 added.)
     else:
         print("No solution found using RBFS.")
     print("It is solvable")
