@@ -2,6 +2,8 @@
 #include <vector>
 #include <algorithm>
 #include <limits>
+#include <chrono>
+#include <iomanip>
 using namespace std;
 
 vector<string> board = {"-","-","-","-","-","-","-","-","-"};
@@ -24,7 +26,7 @@ void takeTurn(string player){
     cin >> position;
     position--;
     while(!isValidPosition(position)){
-        cout << "Position" << position + 1 << " is invalid. Enter a valid position: ";
+        cout << "Position " << position + 1 << " is invalid.\nEnter a valid position between 1-9: ";
         cin >> position;
         position--;
     }
@@ -74,8 +76,37 @@ int evaluationFunction(){
 
     else return 0;
 }
+int minimax(bool isMaximizing) {
+    int score = evaluationFunction();
+    if (score == 1 || score == -1) return score;
+    if (!isMovesLeft()) return 0;
 
-int minimax(bool isMaximizing, int alpha, int beta){
+    if (isMaximizing) {
+        int best = -numeric_limits<int>::max();
+        for (int i = 0; i < 9; i++) {
+            if (board[i] == "-") {
+                board[i] = "O";
+                int val = minimax(false);
+                board[i] = "-";
+                best = max(best, val);
+            }
+        }
+        return best;
+    } else {
+        int best = numeric_limits<int>::max();
+        for (int i = 0; i < 9; i++) {
+            if (board[i] == "-") {
+                board[i] = "X";
+                int val = minimax(true);
+                board[i] = "-";
+                best = min(best, val);
+            }
+        }
+        return best;
+    }
+}
+
+int minimaxWithAlphaBeta(bool isMaximizing, int alpha, int beta){
     int score = evaluationFunction();
     if(score == 1 || score == -1) return score;
     if(!isMovesLeft()) return 0;
@@ -85,7 +116,7 @@ int minimax(bool isMaximizing, int alpha, int beta){
         for(int i = 0; i < 9; i++){
             if(board[i] == "-"){
                 board[i] = "O";
-                int val = minimax(false,alpha, beta);
+                int val = minimaxWithAlphaBeta(false,alpha, beta);
                 board[i] = "-";
                 best = max(best, val);
                 alpha = max(alpha, best);
@@ -99,7 +130,7 @@ int minimax(bool isMaximizing, int alpha, int beta){
         for(int i = 0; i < 9; i++){
             if(board[i] == "-"){
                 board[i] = "X";
-                int val = minimax(true,alpha,beta);
+                int val = minimaxWithAlphaBeta(true,alpha,beta);
                 board[i] = "-";
                 best = min(best, val);
                 beta = min(beta,best);
@@ -116,7 +147,7 @@ int pickBestMove(){
     for(int i =0 ;i<9; i++){
         if(board[i] == "-"){
             board[i] = "X";
-            int moveVal = minimax(true,-numeric_limits<int>::max(), numeric_limits<int>::max());
+            int moveVal = minimaxWithAlphaBeta(true,-numeric_limits<int>::max(), numeric_limits<int>::max());
             board[i] = "-";
             if(moveVal < bestVal){
                 bestMove = i;
@@ -127,6 +158,31 @@ int pickBestMove(){
     return bestMove;
 }    
 
+void compareMinimaxSpeeds() {
+    board = {"X", "O", "-", "-", "X", "-", "-", "-", "O"};
+
+    cout << "\n--- Comparing Minimax vs Alpha-Beta Pruning ---\n";
+    auto start1 = chrono::high_resolution_clock::now();
+    minimax(true);
+    auto end1 = chrono::high_resolution_clock::now();
+    chrono::duration<double, milli> duration1 = end1 - start1;
+    auto start2 = chrono::high_resolution_clock::now();
+    minimaxWithAlphaBeta(true, -numeric_limits<int>::max(), numeric_limits<int>::max());
+    auto end2 = chrono::high_resolution_clock::now();
+    chrono::duration<double, milli> duration2 = end2 - start2;
+
+    cout << "\nExecution Time Comparison:\n";
+    cout << "+-------------------------+------------------+\n";
+    cout << "| Algorithm               | Time (milliseconds) |\n";
+    cout << "+-------------------------+------------------+\n";
+    cout << "| Minimax (no pruning)    | " << setw(16) << fixed << setprecision(3) << duration1.count() << " |\n";
+    cout << "| Alpha-Beta Pruning      | " << setw(16) << fixed << setprecision(3) << duration2.count() << " |\n";
+    cout << "+-------------------------+------------------+\n";
+
+    double speedup = duration1.count() / duration2.count();
+    cout << "| Speed-up Factor         | " << setw(16) << fixed << setprecision(2) << speedup << "x |\n";
+    cout << "+-------------------------+------------------+\n\n";
+}
 
 int main() {
     printBoard();
@@ -152,5 +208,6 @@ int main() {
             currentPlayer = currentPlayer == "X" ? "O" : "X";
         }
     }
+    compareMinimaxSpeeds();
     return 0;
 }
