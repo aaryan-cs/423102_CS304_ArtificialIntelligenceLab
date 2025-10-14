@@ -10,12 +10,13 @@ void printBoard(){
     cout << board[0] << " | " << board[1] << " | " << board[2] << endl;
     cout << board[3] << " | " << board[4] << " | " << board[5] << endl;
     cout << board[6] << " | " << board[7] << " | " << board[8] << endl;
-
 }
+
 bool isValidPosition(int position){
     if(position < 0 || position > 8 || board[position] == "X" || board[position] == "O") return false;
     return true;
 }
+
 void takeTurn(string player){
     cout<< player << "'s turn." << endl;
     cout << "Enter a postion from 1-9:" << endl;
