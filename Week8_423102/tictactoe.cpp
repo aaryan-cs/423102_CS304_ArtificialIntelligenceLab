@@ -108,13 +108,38 @@ int minimax(bool isMaximizing) {
     }
 }
 
+// Find the best move for AI ("O")
+int findBestMove() {
+    int bestVal = 1000;
+    int bestMove = -1;
+    for (int i = 0; i < 9; i++) {
+        if (board[i] == "-") {
+            board[i] = "O";
+            int moveVal = minimax(true);
+            board[i] = "-";
+            if (moveVal < bestVal) {
+                bestMove = i;
+                bestVal = moveVal;
+            }
+        }
+    }
+    return bestMove;
+}
+
 // Define the main game loop
 int main() {
     printBoard();
     string currentPlayer = "X";
     bool gameOver = false;
     while (!gameOver) {
-        takeTurn(currentPlayer);
+        if (currentPlayer == "X") {
+            takeTurn(currentPlayer);
+        } else {
+            cout << "Bot is making a move..." << endl;
+            int aiMove = findBestMove();
+            board[aiMove] = "O";
+            printBoard();
+        }
         string gameResult = checkGameOver();
         if (gameResult == "win") {
             cout << currentPlayer << " wins!" << endl;
