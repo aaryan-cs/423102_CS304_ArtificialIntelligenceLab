@@ -5,6 +5,7 @@
 #include <chrono>
 #include <iomanip>
 using namespace std;
+using namespace std::chrono;
 
 vector<string> board = {"-","-","-","-","-","-","-","-","-"};
 
@@ -116,7 +117,7 @@ int minimaxWithAlphaBeta(bool isMaximizing, int alpha, int beta){
         for(int i = 0; i < 9; i++){
             if(board[i] == "-"){
                 board[i] = "O";
-                int val = minimaxWithAlphaBeta(false,alpha, beta);
+                int val = minimaxWithAlphaBeta(false, alpha, beta);
                 board[i] = "-";
                 best = max(best, val);
                 alpha = max(alpha, best);
@@ -142,7 +143,7 @@ int minimaxWithAlphaBeta(bool isMaximizing, int alpha, int beta){
 }    
 
 int pickBestMove(){
-    int bestVal = 1000;
+    int bestVal = numeric_limits<int>::max();;
     int bestMove = -1;
     for(int i =0 ;i<9; i++){
         if(board[i] == "-"){
@@ -159,30 +160,33 @@ int pickBestMove(){
 }    
 
 void compareMinimaxSpeeds() {
-    board = {"X", "O", "-", "-", "X", "-", "-", "-", "O"};
+    board = {"X", "O", "X", "-", "O", "-", "-", "-", "-"};
 
     cout << "\n--- Comparing Minimax vs Alpha-Beta Pruning ---\n";
-    auto start1 = chrono::high_resolution_clock::now();
-    minimax(true);
-    auto end1 = chrono::high_resolution_clock::now();
-    chrono::duration<double, milli> duration1 = end1 - start1;
-    auto start2 = chrono::high_resolution_clock::now();
-    minimaxWithAlphaBeta(true, -numeric_limits<int>::max(), numeric_limits<int>::max());
-    auto end2 = chrono::high_resolution_clock::now();
-    chrono::duration<double, milli> duration2 = end2 - start2;
+
+    auto start1 = high_resolution_clock::now();
+    for (int i = 0; i < 200; i++)
+        minimax(true);  // minimax
+    auto end1 = high_resolution_clock::now();
+    auto duration1 = duration_cast<milliseconds>(end1 - start1).count();
+
+    auto start2 = high_resolution_clock::now();
+    for (int i = 0; i < 200; i++)
+        minimaxWithAlphaBeta(true, -1e9, 1e9);  // alpha-beta
+    auto end2 = high_resolution_clock::now();
+    auto duration2 = duration_cast<milliseconds>(end2 - start2).count();
 
     cout << "\nExecution Time Comparison:\n";
     cout << "+-------------------------+------------------+\n";
-    cout << "| Algorithm               | Time (milliseconds) |\n";
+    cout << "| Algorithm               |     Time (ms)    |\n";
     cout << "+-------------------------+------------------+\n";
-    cout << "| Minimax (no pruning)    | " << setw(16) << fixed << setprecision(3) << duration1.count() << " |\n";
-    cout << "| Alpha-Beta Pruning      | " << setw(16) << fixed << setprecision(3) << duration2.count() << " |\n";
+    cout << "| Minimax (no pruning)    | " << setw(16) << duration1 << " |\n";
+    cout << "| Alpha-Beta Pruning      | " << setw(16) << duration2 << " |\n";
     cout << "+-------------------------+------------------+\n";
 
-    double speedup = duration1.count() / duration2.count();
-    cout << "| Speed-up Factor         | " << setw(16) << fixed << setprecision(2) << speedup << "x |\n";
-    cout << "+-------------------------+------------------+\n\n";
+    
 }
+
 
 int main() {
     printBoard();
