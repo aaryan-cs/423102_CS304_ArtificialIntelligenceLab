@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
-
+#include <limits>
 using namespace std;
 
 vector<string> board = {"-","-","-","-","-","-","-","-","-"};
@@ -74,29 +74,35 @@ int evaluationFunction(){
     else return 0;
 }
 
-int minimax(bool isMaximizing){
+int minimax(bool isMaximizing, int alpha, int beta){
     int score = evaluationFunction();
     if(score == 1 || score == -1) return score;
     if(!isMovesLeft()) return 0;
 
     if(isMaximizing){
-        int best = -9999;
+        int best = -numeric_limits<int>::max();
         for(int i = 0; i < 9; i++){
             if(board[i] == "-"){
                 board[i] = "O";
-                best = max(best, minimax(false));
+                int val = minimax(false,alpha, beta);
                 board[i] = "-";
+                best = max(best, val);
+                alpha = max(alpha, best);
+                if(beta <= alpha) break;
             }
         }
         return best;
     }
     else{
-        int best = 9999;
+        int best = numeric_limits<int>::max();
         for(int i = 0; i < 9; i++){
             if(board[i] == "-"){
                 board[i] = "X";
-                best = min(best, minimax(true));
+                int val = minimax(true,alpha,beta);
                 board[i] = "-";
+                best = min(best, val);
+                beta = min(beta,best);
+                if(beta<=alpha) break;
             }
         }
         return best;
@@ -109,7 +115,7 @@ int pickBestMove(){
     for(int i =0 ;i<9; i++){
         if(board[i] == "-"){
             board[i] = "X";
-            int moveVal = minimax(true);
+            int moveVal = minimax(true,-numeric_limits<int>::max(), numeric_limits<int>::max());
             board[i] = "-";
             if(moveVal < bestVal){
                 bestMove = i;
