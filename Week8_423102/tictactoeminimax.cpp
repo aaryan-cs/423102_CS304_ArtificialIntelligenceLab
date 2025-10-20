@@ -166,15 +166,16 @@ void compareMinimaxSpeeds() {
 
     auto start1 = high_resolution_clock::now();
     for (int i = 0; i < 200; i++)
-        minimax(true);  // minimax
+        minimax(true);
     auto end1 = high_resolution_clock::now();
     auto duration1 = duration_cast<milliseconds>(end1 - start1).count();
 
     auto start2 = high_resolution_clock::now();
     for (int i = 0; i < 200; i++)
-        minimaxWithAlphaBeta(true, -1e9, 1e9);  // alpha-beta
+        minimaxWithAlphaBeta(true, -1e9, 1e9); 
     auto end2 = high_resolution_clock::now();
     auto duration2 = duration_cast<milliseconds>(end2 - start2).count();
+
 
     cout << "\nExecution Time Comparison:\n";
     cout << "+-------------------------+------------------+\n";
